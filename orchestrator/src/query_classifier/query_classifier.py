@@ -35,5 +35,3 @@ class QueryClassifier:
     
     def formulate_request(self):
         return CLASSIFIER_PROMPT.format(query = self.user_query)
-
-QueryClassifier("What is the weather like today?").classify()
