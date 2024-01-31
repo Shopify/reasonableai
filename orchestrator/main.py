@@ -1,7 +1,16 @@
-from flask import Flask
+from src.query_classifier.query_classifier import QueryClassifier
+class Orchestrator():
+    prompt = "> "
 
-app = Flask(__name__)
+    def chat_loop(self):
+        while True:
+            query = input(self.prompt)
+            print(query)
+            if query == "exit":
+                exit(0)
+            else:
+                response = QueryClassifier(query).classify()
+                print(response)
 
-@app.route('/')
-def hello_world():
-    return "<p>Hello, World!</p>"
+if __name__ == '__main__':
+    Orchestrator().chat_loop()
