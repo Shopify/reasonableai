@@ -2,6 +2,14 @@
 
 🚨Please note this is a Hack Days project and may not adhere to Shopify's code quality standards🚨
 
+## Working with the repository
+
+1. Ensure you have [pipenv](https://pipenv.pypa.io/en/latest/) installed
+2. Run `pipenv install` to install the dependencies
+3. Run `pipenv shell` to shell into your environment
+4. To start the orchestrator `make run_orchestrator`
+5. To start the semantic network `make run_semantic_network`
+
 ## Context
 
 ChatGPT regurgitating facts is a party trick. The true value of Generative AI is its ability to organise information and then reason. This is a proposed open source self-improving auditable framework using Large Language Models (LLMs) like ChatGPT and [Mixtral](https://mistral.ai/news/mixtral-of-experts/).
