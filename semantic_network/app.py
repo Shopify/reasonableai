@@ -36,10 +36,10 @@ relationship_args = {
 }
 
 search_args = {
-    "query": fields.Str(missing=None),
-    "keywords": fields.Str(missing=None),
-    "min_trustworthiness": fields.Float(validate=validate.Range(min=0, max=1), missing=None),
-    "regex": fields.Str(missing=None)
+    "query": fields.Str(load_default=None),
+    "keywords": fields.Str(load_default=None),
+    "min_trustworthiness": fields.Float(validate=validate.Range(min=0, max=1), load_default=None),
+    "regex": fields.Str(load_default=None)
 }
 
 uri = os.getenv("NEO4J_URI")
