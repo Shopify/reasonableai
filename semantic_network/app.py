@@ -182,4 +182,4 @@ def delete_all():
     return jsonify({"message": "All nodes and relationships deleted successfully"}), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
