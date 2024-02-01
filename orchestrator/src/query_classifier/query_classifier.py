@@ -1,5 +1,6 @@
 from jinja2 import Environment, FileSystemLoader
-from ..utils.compentencies import Ability, SemanticNetwork
+from ..models.ability import Ability
+from ..models.semantic_network import SemanticNetwork
 from ..utils.query_llm import QueryLLM
 
 class QueryClassifier:

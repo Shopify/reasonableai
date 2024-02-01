@@ -3,7 +3,8 @@ from tqdm import tqdm
 import numpy as np
 from prettytable import PrettyTable
 from jinja2 import Environment, FileSystemLoader
-from src.utils.compentencies import Ability, SemanticNetwork
+from src.models.ability import Ability
+from src.models.semantic_network import SemanticNetwork
 from src.utils.query_llm import QueryLLM
 
 def save_to_json(data, filename):
