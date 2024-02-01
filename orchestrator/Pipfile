@@ -9,6 +9,7 @@ python-dotenv = "*"
 requests = "*"
 
 [dev-packages]
+tqdm = "*"
 
 [requires]
 python_version = "3.10"
