@@ -7,9 +7,11 @@ name = "pypi"
 flask = "*"
 python-dotenv = "*"
 requests = "*"
+tqdm = "*"
+numpy = "*"
+prettytable = "*"
 
 [dev-packages]
-tqdm = "*"
 
 [requires]
 python_version = "3.10"

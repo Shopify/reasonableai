@@ -1,87 +1,132 @@
-import os
-import requests
 import json
+from tqdm import tqdm
+import numpy as np
+from prettytable import PrettyTable
 from jinja2 import Environment, FileSystemLoader
-from ..src.utils.compentencies import Ability, SemanticNetwork
-from ..src.utils.json_extractor import JsonExtractor
+from src.utils.compentencies import Ability, SemanticNetwork
+from src.utils.query_llm import QueryLLM
 
-models = [
-    'deepseek-llm:67b-chat',
-    'dolphin2.2-mistral:latest',
-    'mistral:latest',
-    'mixtral:latest',
-    'orca-mini:13b',
-    'orca-mini:7b',
-    'phi:latest',
-    'samantha-mistral:latest',
-]
+def save_to_json(data, filename):
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=4)
 
-temperatures = []
+def calculate_consistency(results):
+    for result in results:
+        ratios = [run['ratios'] for run in result['runs']]
+        consistencies = []
+        for i in range(len(ratios[0])):
+            relevance_scores = [ratio[i]['relevance'] for ratio in ratios]
+            confidence_scores = [ratio[i]['confidence'] for ratio in ratios]
+            consistencies.append({
+                'topic name': ratios[0][i]['topic name'],
+                'relevance consistency': np.std(relevance_scores),
+                'relevance max': max(relevance_scores),
+                'relevance min': min(relevance_scores),
+                'relevance avg': np.mean(relevance_scores),
+                'relevance median': np.median(relevance_scores),
+                'confidence consistency': np.std(confidence_scores),
+                'confidence max': max(confidence_scores),
+                'confidence min': min(confidence_scores),
+                'confidence avg': np.mean(confidence_scores),
+                'confidence median': np.median(confidence_scores)
+            })
+        result['consistency'] = consistencies
+        print(f"Consistency for query '{result['query']}' with model '{result['model']}' and temperature {result['temperature']}: {consistencies}")
 
-host = os.getenv("OLLAMA_URL")
+def calculate_timings(results):
+    for result in results:
+        for timing in ['prompt_eval_duration_seconds']:
+            timings = [run[timing] for run in result['runs']]
+            result[timing + '_max'] = max(timings)
+            result[timing + '_avg'] = sum(timings) / len(timings)
 
-prompt_env = Environment(loader=FileSystemLoader('../prompts'))
+def pretty_print_results(results):
+    table = PrettyTable()
+    table.field_names = ["Query", "Model", "Temperature", "Topic", "Relevance Consistency", "Relevance Max", "Relevance Min", "Relevance Avg", "Relevance Median", "Confidence Consistency", "Confidence Max", "Confidence Min", "Confidence Avg", "Confidence Median", "Max Prompt Eval Duration", "Avg Prompt Eval Duration"]
+    for result in results:
+        for consistency in result['consistency']:
+            table.add_row([result['query'], result['model'], result['temperature'], consistency['topic name'], consistency['relevance consistency'], consistency['relevance max'], consistency['relevance min'], consistency['relevance avg'], consistency['relevance median'], consistency['confidence consistency'], consistency['confidence max'], consistency['confidence min'], consistency['confidence avg'], consistency['confidence median'], result['prompt_eval_duration_seconds_max'], result['prompt_eval_duration_seconds_avg']])
+    print(table)
 
-compentencies = [
-    Ability("GitHub", "Read GitHub repos, create pull requests and issues", "http://github.com"),
-    Ability("Researcher", "Search the web information, returns appropriate documents. Useful for finding facts", "http://google.com"),
-    SemanticNetwork("Tigers", "Information about Tigers, their habits, ranges, diets, etc", "http://tigers.com"),
-    SemanticNetwork("Lions", "Information about Lions, their habits, ranges, diets, etc", "http://lions.com"),
-    SemanticNetwork("Cats", "Information about house cats, their habits, naps, diets, etc", "http://cats.com")
-]
+def benchmark():
 
-def request_data(prompt, model='mixtral:latest'):
-    return json.dumps(
-        {
-            "model": model,
-            "stream": False,
-            "messages": [ { "role": "user", "content": prompt } ]
-        }
-    )
+    models = [
+        'deepseek-llm:67b-chat',
+        # 'dolphin2.2-mistral:latest',
+        'mistral:latest',
+        'mixtral:latest',
+        # 'orca-mini:13b',
+        # 'orca-mini:7b',
+        # 'phi:latest',
+        # 'samantha-mistral:latest',
+    ]
 
-def llm_response(template_file, prompt, model):
-    template = prompt_env.get_template(template_file)
-    reasoning_prompt = template.render(prompt=prompt, compentencies=compentencies)
-    response = requests.post(f"{host}/api/chat", data=request_data(reasoning_prompt))
+    temperatures = [0.0, 0.2, 0.5]
 
-    llm_response = response.json()["message"]["content"]
-    return JsonExtractor(llm_response).extract()
+    compentencies = [
+        Ability("GitHub", "Read GitHub repos, create pull requests and issues", "http://github.com"),
+        Ability("Researcher", "Search the web information, returns appropriate documents. Useful for finding facts", "http://google.com"),
+        SemanticNetwork("Tigers", "Information about Tigers, their habits, ranges, diets, etc", "http://tigers.com"),
+        SemanticNetwork("Lions", "Information about Lions, their habits, ranges, diets, etc", "http://lions.com"),
+        SemanticNetwork("Cats", "Information about house cats, their habits, naps, diets, etc", "http://cats.com")
+    ]
 
+    queries = [
+        "Where do big wild cats live?",
+        "When was the last commit to the ReasonAbleAI repo?",
+    ]
 
-def test_query_classifier_with_cat_question():
-    actual = llm_response('query_classifier.j2', "Where do big wild cats live?")
+    runs = 5
 
-    assert len(actual['ratios']) == len(compentencies)
+    prompt_env = Environment(loader=FileSystemLoader('prompts'))
+    template = prompt_env.get_template('query_classifier.j2')
 
-    expected_ranges = {
-        'GitHub': (0, 0.1),
-        'Researcher': (0.4, 0.7),
-        'Tigers': (0.5, 1.0),
-        'Lions': (0.5, 1.0),
-        'Cats': (0.1, 0.4)
-    }
+    number_of_tests = len(queries) * len(models) * len(temperatures) * runs
+    print(f"Running {number_of_tests} tests")
 
-    for ratio in actual['ratios']:
-        topic_name = ratio['topic name']
-        if topic_name in expected_ranges:
-            lower, upper = expected_ranges[topic_name]
-            assert lower <= ratio['relevance'] <= upper
+    results = []
 
-def test_query_classifier_with_github_question():
-    actual = llm_response('query_classifier.j2', "When was the last commit to the ReasonAbleAI repo?")
+    pbar = tqdm(total=number_of_tests)
 
-    assert len(actual['ratios']) == len(compentencies)
+    for query in queries:
+        prompt = template.render(prompt=query, compentencies=compentencies)
+        for model in models:
+            for temperature in temperatures:
+                details = {
+                    "query": query,
+                    "model": model,
+                    "temperature": temperature,
+                    "runs": []
+                }
+                for i in range(runs):
+                    tqdm.write(f"Benchmarking: '{query}', model: '{model}', temperature: {temperature}, run: {i+1} of {runs}")
 
-    expected_ranges = {
-        'GitHub': (0.7, 1.0),
-        'Researcher': (0.1, 0.5),
-        'Tigers': (0.0, 0.1),
-        'Lions': (0.0, 0.1),
-        'Cats': (0.0, 0.1)
-    }
+                    response = QueryLLM(
+                        prompt=prompt,
+                        model=model,
+                        temperature=temperature,
+                        json_response=True,
 
-    for ratio in actual['ratios']:
-        topic_name = ratio['topic name']
-        if topic_name in expected_ranges:
-            lower, upper = expected_ranges[topic_name]
-            assert lower <= ratio['relevance'] <= upper
+                    ).response
+
+                    details['runs'].append({
+                        "ratios": response['message']['content']['ratios'],
+                        "prompt_eval_duration_seconds": response['prompt_eval_duration'] / 1000000.0,
+                        "eval_count": response['eval_count'],
+                    })
+
+                    pbar.update()
+
+                results.append(details)
+
+    pbar.close()
+
+    calculate_consistency(results)
+    calculate_timings(results)
+
+    pretty_print_results(results)
+
+    save_to_json(results, 'benchmarking/query_classifier.json')
+
+if __name__ == '__main__':
+    benchmark()
