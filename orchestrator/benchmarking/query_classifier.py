@@ -1,26 +1,19 @@
-import os
-import requests
-import json
-from jinja2 import Environment, FileSystemLoader
-from ..src.utils.compentencies import Ability, SemanticNetwork
-from ..src.utils.json_extractor import JsonExtractor
+from tqdm import tqdm
+from src.utils.compentencies import Ability, SemanticNetwork
+from src.utils.query_llm import QueryLLM
 
 models = [
-    'deepseek-llm:67b-chat',
-    'dolphin2.2-mistral:latest',
-    'mistral:latest',
+    # 'deepseek-llm:67b-chat',
+    # 'dolphin2.2-mistral:latest',
+    # 'mistral:latest',
     'mixtral:latest',
-    'orca-mini:13b',
-    'orca-mini:7b',
-    'phi:latest',
-    'samantha-mistral:latest',
+    # 'orca-mini:13b',
+    # 'orca-mini:7b',
+    # 'phi:latest',
+    # 'samantha-mistral:latest',
 ]
 
-temperatures = []
-
-host = os.getenv("OLLAMA_URL")
-
-prompt_env = Environment(loader=FileSystemLoader('../prompts'))
+temperatures = [0]
 
 compentencies = [
     Ability("GitHub", "Read GitHub repos, create pull requests and issues", "http://github.com"),
@@ -30,58 +23,27 @@ compentencies = [
     SemanticNetwork("Cats", "Information about house cats, their habits, naps, diets, etc", "http://cats.com")
 ]
 
-def request_data(prompt, model='mixtral:latest'):
-    return json.dumps(
-        {
-            "model": model,
-            "stream": False,
-            "messages": [ { "role": "user", "content": prompt } ]
-        }
-    )
+queries = [
+    "Where do big wild cats live?",
+    # "When was the last commit to the ReasonAbleAI repo?",
+]
 
-def llm_response(template_file, prompt, model):
-    template = prompt_env.get_template(template_file)
-    reasoning_prompt = template.render(prompt=prompt, compentencies=compentencies)
-    response = requests.post(f"{host}/api/chat", data=request_data(reasoning_prompt))
+attempts = 2
 
-    llm_response = response.json()["message"]["content"]
-    return JsonExtractor(llm_response).extract()
+prompt_env = Environment(loader=FileSystemLoader('../prompts'))
+template = prompt_env.get_template('query_classifier.j2')
 
+number_of_tests = len(queries) * len(models) * len(temperatures) * attempts
 
-def test_query_classifier_with_cat_question():
-    actual = llm_response('query_classifier.j2', "Where do big wild cats live?")
+results = []
 
-    assert len(actual['ratios']) == len(compentencies)
+for query in queries:
+    reasoning_prompt = template.render(prompt=query, compentencies=compentencies)
 
-    expected_ranges = {
-        'GitHub': (0, 0.1),
-        'Researcher': (0.4, 0.7),
-        'Tigers': (0.5, 1.0),
-        'Lions': (0.5, 1.0),
-        'Cats': (0.1, 0.4)
-    }
+    for model in models:
+        for temperature in temperatures:
+            for i in range(attempts):
+                response = QueryLLM(reasoning_prompt).response['message']['content']
+                results.append(results)
 
-    for ratio in actual['ratios']:
-        topic_name = ratio['topic name']
-        if topic_name in expected_ranges:
-            lower, upper = expected_ranges[topic_name]
-            assert lower <= ratio['relevance'] <= upper
-
-def test_query_classifier_with_github_question():
-    actual = llm_response('query_classifier.j2', "When was the last commit to the ReasonAbleAI repo?")
-
-    assert len(actual['ratios']) == len(compentencies)
-
-    expected_ranges = {
-        'GitHub': (0.7, 1.0),
-        'Researcher': (0.1, 0.5),
-        'Tigers': (0.0, 0.1),
-        'Lions': (0.0, 0.1),
-        'Cats': (0.0, 0.1)
-    }
-
-    for ratio in actual['ratios']:
-        topic_name = ratio['topic name']
-        if topic_name in expected_ranges:
-            lower, upper = expected_ranges[topic_name]
-            assert lower <= ratio['relevance'] <= upper
+print(results)
