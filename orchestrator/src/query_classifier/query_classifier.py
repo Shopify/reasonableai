@@ -1,35 +1,20 @@
-import os
-import json
-import requests
-from dotenv import load_dotenv
-from ..utils.classifier_prompt import CLASSIFIER_PROMPT
-from ..utils.json_extractor import JsonExtractor
-
-load_dotenv()
+from jinja2 import Environment, FileSystemLoader
+from ..utils.compentencies import Ability, SemanticNetwork
+from ..utils.query_llm import QueryLLM
 
 class QueryClassifier:
     def __init__(self, user_query):
         self.user_query = user_query
+        self.compentencies = [
+            Ability("GitHub", "Read GitHub repos, create pull requests and issues", "http://github.com"),
+            Ability("Researcher", "Search the web information, returns appropriate documents. Useful for finding facts", "http://google.com"),
+            SemanticNetwork("Tigers", "Information about Tigers, their habits, ranges, diets, etc", "http://tigers.com"),
+            SemanticNetwork("Lions", "Information about Lions, their habits, ranges, diets, etc", "http://lions.com"),
+            SemanticNetwork("Cats", "Information about house cats, their habits, naps, diets, etc", "http://cats.com")
+        ] #this will be replaced with a global variable or model
 
     def classify(self):
-        host = os.getenv("OLLAMA_URL")
-        headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
-        response = requests.post(f"{host}/api/chat", headers=headers, data=self.json_request())
-        if response.status_code == 200:
-            llm_response = response.json()["message"]["content"]
-            return JsonExtractor(llm_response).extract()
-        else:
-            print(f"Error with request, status code: {response.status_code}")
-            raise Exception("Error with request")
-
-    def json_request(self):
-        return json.dumps(
-            {
-                "model": "mixtral:latest",
-                "stream": False,
-                "messages": [ { "role": "user", "content": self.formulate_request() } ]
-            }
-        )
-
-    def formulate_request(self):
-        return CLASSIFIER_PROMPT.format(query = self.user_query)
+        prompt_env = Environment(loader=FileSystemLoader('prompts'))
+        template = prompt_env.get_template('query_classifier.j2')
+        reasoning_prompt = template.render(prompt=self.user_query, compentencies=self.compentencies)
+        return QueryLLM(reasoning_prompt).response['message']['content']
