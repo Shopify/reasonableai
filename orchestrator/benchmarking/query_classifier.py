@@ -1,13 +1,27 @@
 import os
 import requests
 import json
-import pytest
 from jinja2 import Environment, FileSystemLoader
 from ..src.utils.compentencies import Ability, SemanticNetwork
 from ..src.utils.json_extractor import JsonExtractor
 
-env = Environment(loader=FileSystemLoader('../prompts'))
+models = [
+    'mixtral:latest',
+    'samantha-mistral:latest',
+    'phi:latest',
+    'orca-mini:7b',
+    'orca-mini:13b',
+    'mistral:latest',
+    'dolphin2.2-mistral:latest',
+    'deepseek-llm:67b-chat'
+]
+
+temperatures = []
+
 host = os.getenv("OLLAMA_URL")
+
+prompt_env = Environment(loader=FileSystemLoader('../prompts'))
+
 compentencies = [
     Ability("GitHub", "Read GitHub repos, create pull requests and issues", "http://github.com"),
     Ability("Researcher", "Search the web information, returns appropriate documents. Useful for finding facts", "http://google.com"),
@@ -25,8 +39,8 @@ def request_data(prompt, model='mixtral:latest'):
         }
     )
 
-def llm_response(template_file, prompt):
-    template = env.get_template(template_file)
+def llm_response(template_file, prompt, model):
+    template = prompt_env.get_template(template_file)
     reasoning_prompt = template.render(prompt=prompt, compentencies=compentencies)
     response = requests.post(f"{host}/api/chat", data=request_data(reasoning_prompt))
 
