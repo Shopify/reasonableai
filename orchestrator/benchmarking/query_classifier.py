@@ -6,14 +6,14 @@ from ..src.utils.compentencies import Ability, SemanticNetwork
 from ..src.utils.json_extractor import JsonExtractor
 
 models = [
-    'mixtral:latest',
-    'samantha-mistral:latest',
-    'phi:latest',
-    'orca-mini:7b',
-    'orca-mini:13b',
-    'mistral:latest',
+    'deepseek-llm:67b-chat',
     'dolphin2.2-mistral:latest',
-    'deepseek-llm:67b-chat'
+    'mistral:latest',
+    'mixtral:latest',
+    'orca-mini:13b',
+    'orca-mini:7b',
+    'phi:latest',
+    'samantha-mistral:latest',
 ]
 
 temperatures = []
