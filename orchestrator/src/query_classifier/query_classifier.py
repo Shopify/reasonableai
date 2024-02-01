@@ -10,13 +10,11 @@ load_dotenv()
 class QueryClassifier:
     def __init__(self, user_query):
         self.user_query = user_query
-    
+
     def classify(self):
-        host = os.getenv("ORCHESTRATOR_SERVER", "localhost")
-        username = os.getenv("ORCHESTRATOR_USERNAME", "")
-        password = os.getenv("ORCHESTRATOR_PASSWORD", "")
+        host = os.getenv("OLLAMA_URL")
         headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
-        response = requests.post(host, headers=headers, data=self.json_request(), auth=(username, password))
+        response = requests.post(f"{host}/api/chat", headers=headers, data=self.json_request())
         if response.status_code == 200:
             llm_response = response.json()["message"]["content"]
             return JsonExtractor(llm_response).extract()
@@ -32,6 +30,6 @@ class QueryClassifier:
                 "messages": [ { "role": "user", "content": self.formulate_request() } ]
             }
         )
-    
+
     def formulate_request(self):
         return CLASSIFIER_PROMPT.format(query = self.user_query)
