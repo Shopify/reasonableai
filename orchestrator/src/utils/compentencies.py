@@ -1,26 +1,10 @@
 import os
 import requests
 from dotenv import load_dotenv
+from ..models.ability import Ability
+from ..models.semantic_network import SemanticNetwork
 
 load_dotenv()
-
-class Ability:
-    def __init__(self, name, description, url):
-        self.name = name
-        self.description = description
-        self.url = url
-
-    def __repr__(self):
-        return f"Ability(name='{self.name}', description='{self.description}')"
-
-class SemanticNetwork:
-    def __init__(self, name, description, url):
-        self.name = name
-        self.description = description
-        self.url = url
-
-    def __repr__(self):
-        return f"SemanticNetwork(name='{self.name}', description='{self.description}')"
 
 class Competencies:
     def __init__(self):
