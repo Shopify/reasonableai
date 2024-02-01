@@ -172,8 +172,8 @@ def delete_relationship(id):
 
 @app.route('/documentation', methods=['GET'])
 def get_documentation():
-    documentation = os.getenv("API_DOCUMENTATION")
-    return jsonify({"documentation": documentation})
+    description = os.getenv("DESCRIPTION")
+    return jsonify({"description": description})
 
 @app.route('/delete_all', methods=['DELETE'])
 def delete_all():
