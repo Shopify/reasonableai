@@ -1,4 +1,4 @@
-from .celery_app import app
+from celery_app import app
 from .maintenance import startup
 from .chat import process_incoming_message, post_message_to_chat
 
