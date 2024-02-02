@@ -4,6 +4,7 @@ import requests
 import time
 from dotenv import load_dotenv
 from ..utils.json_extractor import JsonExtractor
+from ..utils.load_settings import OLLAMA_URL
 
 load_dotenv()
 
@@ -13,7 +14,6 @@ class QueryLLM:
         self.model = model
         self.temperature = temperature
         self.json_response = json_response
-        self.ollama_host = os.getenv('OLLAMA_URL')
         self.response = self.get_response()
 
     def _json_request(self):
@@ -31,14 +31,14 @@ class QueryLLM:
     def _send_request(self):
         headers = { 'Content-Type': 'application/x-www-form-urlencoded' }
         data = self._json_request()
-        ollama_api_url = f"{self.ollama_host}/api/chat"
+        ollama_api_url = f"{OLLAMA_URL}/api/chat"
         response = requests.post(ollama_api_url, headers=headers, data=data)
         if response.status_code == 200:
             return response.json()
         else:
-            raise Exception(f"Error: {self.ollama_host} responded with status code {response.status_code}")
+            raise Exception(f"Error: {OLLAMA_URL} responded with status code {response.status_code}")
 
-    def get_response(self, tries=8):
+    def get_response(self, tries=2):
         backoff_time = 1
         for i in range(tries):
             try:

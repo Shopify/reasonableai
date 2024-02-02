@@ -7,13 +7,9 @@ from src.utils.load_settings import SEMANTIC_NETWORKS, ABILITIES, DESIRES
 def process_incoming_message(message):
     print('Processing incoming message: {}'.format(message))
     print('Classifying message...')
-    print(f"Semantic networks: {SEMANTIC_NETWORKS}")
-    print(f"Abilities: {ABILITIES}")
-    print(f"Desires: {DESIRES}")
     query_classification = QueryClassifier(message).classify()
     print(f'Classification results: {query_classification}')
-    most_relevant_topic = query_classification[0]
-    message = f"The most relevant topic is: {most_relevant_topic['topic name']}"
+    message = f"These are the results of the query classification: {query_classification}"
     print(f"Posting message to chat: {message}")
     app.send_task('post_message_to_chat', kwargs={'message': message})
 

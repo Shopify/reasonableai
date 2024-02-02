@@ -1,21 +1,50 @@
-Your job is to classify how releveant all of the given topics are to the prompt below. Do not deviate from the instructions or make things up.
+Your job is to determine how best to action an incoming prompt. Do not deviate from the instructions or make things up.
 
-Here are the topics and their desciptions as a JSON Blob:
+You will be setting relevance scores between 0 and 1 for each semantic network, ability, and desire for the given prompt.
 
-{"topics": [{% for compentency in compentencies %}
-  {"topic name": "{{ compentency.name }}", "topic description": "{{ compentency.description }}"}{% if not loop.last %},{% endif %}
+Semantic Networks are a data store based on a particular topic. Use the description of the semantic network to determine its relevance score for the given prompt.
+Here is a JSON blob with details for each semantic network.
+
+{"semantic networks": [{% for semantic_network in semantic_networks %}
+  {"name": "{{ semantic_network.name }}", "description": "{{ semantic_network.description }}"}{% if not loop.last %},{% endif %}
 {%- endfor %}
 ]}
 
-For each topic name, you will return a relevance score between 0 and 1 representing how relevant the prompt is to the given topic.
+Abilities are app that can achieve some goal. Use the description of the ability to determine its relevance score for the given prompt.
+Here is a JSON blob with details for each ability.
 
-You should return a JSON Blob object with the structure:
+{"abilities": [{% for ability in abilities %}
+  {"name": "{{ ability.name }}", "description": "{{ ability.description }}"}{% if not loop.last %},{% endif %}
+{%- endfor %}
+]}
 
-{ "ratios": [{"topic name": <topic_name>, "relevance": <relevance_score>}] }
+Desires are the things that you wants to achieve. Use the description of the desire to determine its relevance score for the given prompt.
+Here is a JSON blob with details for each desire.
 
-Example response:
+{"desires": [{% for desire in desires %}
+  {"name": "{{ desire.name }}", "description": "{{ desire.description }}"}{% if not loop.last %},{% endif %}
+{%- endfor %}
+]}
 
-{ "ratios": [{% for compentency in compentencies %}{"topic name": "{{ compentency.name }}", "relevance": 0.{{ loop.index }}}{% if not loop.last %},{% endif %}{% endfor %}]}
+You will also analyse the prompt and determine how accurate each of the following meta questions are for the prompt.
+You will set an accuracy score between 0 and 1 where 0 means the meta question is not accurate to the prompt and 1 means the meta question is very accurate to the prompt.
+Here is a JSON blob for each meta question
+
+{"meta questions": [{% for meta_question in meta_questions %}
+  "{{ meta_question }}"{% if not loop.last %},{% endif %}
+{%- endfor %}
+]}
+
+You will return a JSON blob with the following structure:
+
+{
+    "semantic networks": [{% for semantic_network in semantic_networks %}{"semantic network": "{{ semantic_network.name }}", "relevance": 0.{{ loop.index }}}{% if not loop.last %},{% endif %}{% endfor %}],
+    "abilities": [{% for ability in abilities %}{"ability": "{{ ability.name }}", "relevance": 0.{{ loop.index }}}{% if not loop.last %},{% endif %}{% endfor %}],
+    "desires": [{% for desire in desires %}{"desire": "{{ desire.name }}", "relevance": 0.{{ loop.index }}}{% if not loop.last %},{% endif %}{% endfor %}],
+    "meta questions": [{% for meta_question in meta_questions %}{"meta question": "{{ meta_question }}", "accuracy": 0.{{ loop.index }}}{% if not loop.last %},{% endif %}{% endfor %}],
+}
+
+Include a relevance score between 0 and 1 for each semantic network, ability, desire, and meta question. Include an entry for each semantic network, ability, desire, and meta question, even if the relevance score is 0.
 
 Return ONLY the JSON Blob object, nothing else.
 
