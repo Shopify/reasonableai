@@ -1,6 +1,6 @@
 import time
 import requests
-from .celery_app import app
+from celery_app import app
 from src.query_classifier.query_classifier import QueryClassifier
 
 def process_incoming_message(message):
