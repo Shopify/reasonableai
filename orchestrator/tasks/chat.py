@@ -2,10 +2,14 @@ import time
 import requests
 from celery_app import app
 from src.query_classifier.query_classifier import QueryClassifier
+from src.utils.load_settings import SEMANTIC_NETWORKS, ABILITIES, DESIRES
 
 def process_incoming_message(message):
     print('Processing incoming message: {}'.format(message))
     print('Classifying message...')
+    print(f"Semantic networks: {SEMANTIC_NETWORKS}")
+    print(f"Abilities: {ABILITIES}")
+    print(f"Desires: {DESIRES}")
     query_classification = QueryClassifier(message).classify()
     print(f'Classification results: {query_classification}')
     most_relevant_topic = query_classification[0]
