@@ -18,4 +18,6 @@ class QueryClassifier:
         prompt_env = Environment(loader=FileSystemLoader('prompts'))
         template = prompt_env.get_template('query_classifier.j2')
         reasoning_prompt = template.render(prompt=self.user_query, compentencies=self.compentencies)
-        return QueryLLM(reasoning_prompt).response['message']['content']
+        query_classification = QueryLLM(reasoning_prompt, json_response=True).response['message']['content']
+        sorted_query_classification = sorted(query_classification['ratios'], key=lambda x: x['relevance'], reverse=True)
+        return sorted_query_classification
