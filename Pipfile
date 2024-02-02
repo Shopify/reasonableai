@@ -4,14 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
-python-dotenv = "*"
-requests = "*"
-tqdm = "*"
-numpy = "*"
-prettytable = "*"
 celery = "*"
-podman-compose = "*"
 
 [dev-packages]
 
