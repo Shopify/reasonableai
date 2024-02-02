@@ -1,0 +1,4 @@
+benchmarking/*.json
+.env
+.pytest_cache
+rabbitdata
