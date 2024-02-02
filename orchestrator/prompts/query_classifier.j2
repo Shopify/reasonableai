@@ -7,18 +7,18 @@ Here are the topics and their desciptions as a JSON Blob:
 {%- endfor %}
 ]}
 
-For each topic name, you will return a relevance score and a confidence score.
-The relevance score is a number between 0 and 1 representing how relevant the prompt is to the given topic.
-The confidence score is a number between 0 and 1 representing how confident you are in your relevance determination.
+For each topic name, you will return a relevance score between 0 and 1 representing how relevant the prompt is to the given topic.
 
 You should return a JSON Blob object with the structure:
 
-{ "ratios": [{"topic name": <topic_name>, "relevance": <relevance_score>, "confidence": <confidence_score>}] }
+{ "ratios": [{"topic name": <topic_name>, "relevance": <relevance_score>}] }
 
 Example response:
 
-{ "ratios": [{% for compentency in compentencies %}{"topic name": "{{ compentency.name }}", "relevance": 0.{{ loop.index }}, "confidence": 0.{{ loop.index + 3 }}}{% if not loop.last %},{% endif %}{% endfor %}]}
+{ "ratios": [{% for compentency in compentencies %}{"topic name": "{{ compentency.name }}", "relevance": 0.{{ loop.index }}}{% if not loop.last %},{% endif %}{% endfor %}]}
 
 Return ONLY the JSON Blob object, nothing else.
 
-Prompt: "{{ prompt }}"
+Prompt: """
+{{ prompt }}
+"""
