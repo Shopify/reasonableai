@@ -13,6 +13,7 @@ prettytable = "*"
 celery = "*"
 podman-compose = "*"
 flask-socketio = "*"
+pyyaml = "*"
 
 [dev-packages]
 
