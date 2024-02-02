@@ -17,19 +17,13 @@ def calculate_consistency(results):
         consistencies = []
         for i in range(len(ratios[0])):
             relevance_scores = [ratio[i]['relevance'] for ratio in ratios]
-            confidence_scores = [ratio[i]['confidence'] for ratio in ratios]
             consistencies.append({
                 'topic name': ratios[0][i]['topic name'],
                 'relevance consistency': np.std(relevance_scores),
                 'relevance max': max(relevance_scores),
                 'relevance min': min(relevance_scores),
                 'relevance avg': np.mean(relevance_scores),
-                'relevance median': np.median(relevance_scores),
-                'confidence consistency': np.std(confidence_scores),
-                'confidence max': max(confidence_scores),
-                'confidence min': min(confidence_scores),
-                'confidence avg': np.mean(confidence_scores),
-                'confidence median': np.median(confidence_scores)
+                'relevance median': np.median(relevance_scores)
             })
         result['consistency'] = consistencies
         print(f"Consistency for query '{result['query']}' with model '{result['model']}' and temperature {result['temperature']}: {consistencies}")
@@ -43,41 +37,46 @@ def calculate_timings(results):
 
 def pretty_print_results(results):
     table = PrettyTable()
-    table.field_names = ["Query", "Model", "Temperature", "Topic", "Relevance Consistency", "Relevance Max", "Relevance Min", "Relevance Avg", "Relevance Median", "Confidence Consistency", "Confidence Max", "Confidence Min", "Confidence Avg", "Confidence Median", "Max Prompt Eval Duration", "Avg Prompt Eval Duration"]
+    table.field_names = ["Query", "Model", "Temperature", "Topic", "Relevance Consistency", "Relevance Max", "Relevance Min", "Relevance Avg", "Relevance Median", "Max Prompt Eval Duration", "Avg Prompt Eval Duration"]
     for result in results:
         for consistency in result['consistency']:
-            table.add_row([result['query'], result['model'], result['temperature'], consistency['topic name'], consistency['relevance consistency'], consistency['relevance max'], consistency['relevance min'], consistency['relevance avg'], consistency['relevance median'], consistency['confidence consistency'], consistency['confidence max'], consistency['confidence min'], consistency['confidence avg'], consistency['confidence median'], result['prompt_eval_duration_seconds_max'], result['prompt_eval_duration_seconds_avg']])
+            table.add_row([result['query'], result['model'], result['temperature'], consistency['topic name'], consistency['relevance consistency'], consistency['relevance max'], consistency['relevance min'], consistency['relevance avg'], consistency['relevance median'], result['prompt_eval_duration_seconds_max'], result['prompt_eval_duration_seconds_avg']])
     print(table)
 
 def benchmark():
 
     models = [
-        'deepseek-llm:67b-chat',
+        # 'deepseek-llm:67b-chat',
         # 'dolphin2.2-mistral:latest',
         'mistral:latest',
         'mixtral:latest',
+        # 'llama2:13b',
         # 'orca-mini:13b',
         # 'orca-mini:7b',
         # 'phi:latest',
         # 'samantha-mistral:latest',
     ]
 
-    temperatures = [0.0, 0.2, 0.5]
+    temperatures = [0.0]
 
     compentencies = [
         Ability("GitHub", "Read GitHub repos, create pull requests and issues", "http://github.com"),
-        Ability("Researcher", "Search the web information, returns appropriate documents. Useful for finding facts", "http://google.com"),
+        Ability("Researcher", "Search the web information, returns appropriate documents. Useful for finding facts or researching topics.", "http://google.com"),
         SemanticNetwork("Tigers", "Information about Tigers, their habits, ranges, diets, etc", "http://tigers.com"),
         SemanticNetwork("Lions", "Information about Lions, their habits, ranges, diets, etc", "http://lions.com"),
-        SemanticNetwork("Cats", "Information about house cats, their habits, naps, diets, etc", "http://cats.com")
+        SemanticNetwork("Cats", "Information about house cats, their habits, naps, diets, etc", "http://cats.com"),
+        SemanticNetwork("Dogs", "Information about dogs, their habits, barking, diets, etc", "http://cats.com"),
+        SemanticNetwork("Wolves", "Information about wolves, their habits, naps, diets, etc", "http://cats.com"),
+        SemanticNetwork("Health", "Information and articles about human health from jounrals", "http://cats.com"),
     ]
 
     queries = [
-        "Where do big wild cats live?",
-        "When was the last commit to the ReasonAbleAI repo?",
+        "What could be causing my dog to vomit?",
+        # "What wild cats live in India?",
+        # "What are the symptoms of diabetes?",
     ]
 
-    runs = 5
+    runs = 2
 
     prompt_env = Environment(loader=FileSystemLoader('prompts'))
     template = prompt_env.get_template('query_classifier.j2')
