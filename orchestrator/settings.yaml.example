@@ -1,0 +1,12 @@
+semantic_networks:
+  - name: Tigers
+    url: https://tigers.domain.tld
+    description: Has details about tigers, their habbits, range, etc
+abilities:
+  - name: Researcher
+    url: https://reseracher.domain.tld
+    description: Can query the internet to reserach any topic
+desires:
+  - name: Tigers
+    priority: 10
+    description: Use the Researcher ability to learn about Tigers and store that information in the Tigers semantic network
