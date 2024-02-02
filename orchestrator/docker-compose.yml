@@ -1,5 +1,29 @@
-version: "3.9"
+version: '3'
 services:
+  web:
+    build: .
+    command: python app.py
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    environment:
+      - RABBITMQ_HOST=amqp://guest:guest@my-rabbit:5672/
+      - OLLAMA_URL=${OLLAMA_URL}
+    depends_on:
+      - my-rabbit
+
+  worker:
+    build: .
+    command: python celery_app.py
+    volumes:
+      - .:/app
+    environment:
+      - RABBITMQ_HOST=amqp://guest:guest@my-rabbit:5672/
+      - OLLAMA_URL=${OLLAMA_URL}
+    depends_on:
+      - my-rabbit
+
   my-rabbit:
     image: rabbitmq:3-management-alpine
     container_name: my-rabbit

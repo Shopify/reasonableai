@@ -10,3 +10,5 @@ desires:
   - name: Tigers
     priority: 10
     description: Use the Researcher ability to learn about Tigers and store that information in the Tigers semantic network
+# Note, this can also be set as an environment variable OLLAMA_URL
+ollama_url: https://ollama-api.domain.tld
