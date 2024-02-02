@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Interface</title>
+    <style>
+        #chat-window {
+            width: 100%;
+            height: 90vh;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        #message-input {
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-window"></div>
+    <form id="message-form">
+        <input type="text" id="message-input" required>
+        <button type="submit">Send</button>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var socket = io();
+            socket.on('message', function(msg) {
+                var prefix = msg.type === 'robot' ? '🤖 ' : '🙋 ';
+                $('#chat-window').append('<p>' + prefix + msg.text + '</p>');
+            });
+
+            $('#message-form').on('submit', function(e) {
+                e.preventDefault();
+                var message = $('#message-input').val();
+                $('#chat-window').append('<p>🙋 ' + message + '</p>');
+                $('#message-input').val('');
+                $.post('/send_message', {message: message});
+            });
+        });
+    </script>
+</body>
+</html>

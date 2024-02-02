@@ -12,6 +12,7 @@ numpy = "*"
 prettytable = "*"
 celery = "*"
 podman-compose = "*"
+flask-socketio = "*"
 
 [dev-packages]
 
