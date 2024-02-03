@@ -1,4 +1,5 @@
 import yaml
+import os
 from src.models.ability import Ability
 from src.models.semantic_network import SemanticNetwork
 from src.models.desire import Desire
@@ -43,3 +44,5 @@ if settings.get('desires'):
         DESIRES.append(desire)
 
 print(f'Loaded desires: {DESIRES}')
+
+OLLAMA_URL = settings.get('ollama_url') or os.getenv('OLLAMA_URL')
