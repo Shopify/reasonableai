@@ -15,6 +15,7 @@ podman-compose = "*"
 flask-socketio = "*"
 pyyaml = "*"
 gunicorn = "*"
+eventlet = "*"
 
 [dev-packages]
 

@@ -1,8 +1,9 @@
 version: '3'
 services:
-  web:
+  orchestrator-web:
     build: .
-    command: gunicorn -b 0.0.0.0:5000 app:app
+    container_name: orchestrator-web
+    hostname: orchestrator-web-host
     volumes:
       - .:/app
     ports:
@@ -13,13 +14,16 @@ services:
     depends_on:
       - my-rabbit
 
-  worker:
+  orchestrator-worker:
     build: .
-    command: python celery_app.py
+    command: celery -A celery_app worker
+    container_name: orchestrator-worker
+    hostname: orchestrator-worker-host
     volumes:
       - .:/app
     environment:
       - RABBITMQ_HOST=amqp://guest:guest@my-rabbit:5672/
+      - ORCHESTRATOR_WEB_URL=http://orchestrator-web:5000
       - OLLAMA_URL=${OLLAMA_URL}
     depends_on:
       - my-rabbit
