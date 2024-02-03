@@ -8,7 +8,7 @@ A semantic network stores concepts within a graph-based data structure and acces
 2. Run `pipenv install` to install the dependencies
 3. Run `pipenv shell` to shell into your environment
 
-# Podman
+## Containerized Deployment
 
 Example `docker-compose.yaml`
 
