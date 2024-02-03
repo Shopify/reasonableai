@@ -1,0 +1,27 @@
+Rate the following joke on a sliding scale from 0 to 1 using the following dimensions of humor
+
+ - Script Opposition (SO): Does this joke have different ideas that are opposite or contrasting? 0 means no script opposition, 1 means maximum script opposition.
+ - Logical Mechanism (LM): Is there a cleaver twist or the surprise element in the joke. 1 means the joke has a big twist or surprise, 0 means the joke has no twist.
+ - Punching Down (PD): Does this joke make fun at the expense of disempowered individual human or group of humans? For instance, does this joke make fun of people who are less powerful or privileged? 1 means the joke is making fun at someone's expense, 0 means the joke is not targeting anyone.
+ - Punny (PU): Is there a pun or play on words for this joke? 1 means the joke has a cleaver pun, 0 means the joke has no pun.
+ - Absurd (AB): Does this joke include ridiculous or impossible situations? 1 means the joke is higly absurd, 0 means the joke is not at all absurd.
+ - Sensical (SE): Does this joke make sense? 1 means the joke is highly sensical, 0 means the joke is not at all sensical.
+ - Grammar (GR): Is the grammar of the joke correct? 1 means the grammar is correct, 0 means the grammar is incorrect.
+
+Respond only with a JSON blob in the following format:
+
+{
+    "SO": 0.6,
+    "LM": 0.4,
+    "PD": 0.7,
+    "PU": 0.3,
+    "AB": 0.2,
+    "SE": 0.8,
+    "GR": 0.9
+}
+
+Rate the jokes very conservatively. Rate low if you are unsure of how to rate this joke on a given dimension. Do not include explanations or any other information in your response. Just a JSON blob with no wrappings.
+
+Joke: """
+{{ joke }}
+"""
